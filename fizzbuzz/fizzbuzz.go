@@ -14,8 +14,8 @@ import (
 
 
 
-//		Defining needed variables for fizzbuzz
-var count 		int = 1
+//		Defining needed custom variables for fizzbuzz
+//		function
 var limit 		int
 var int1 		int
 var int2 		int
@@ -28,39 +28,70 @@ type payload struct {
 	Results 	[]string 	`json:"fizzbuzz_results"`
 }
 
+//		Defining err variable for handling errors
+var err	error
 
 
-//		Fizzbuzz function
-func FizzBuzz(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+
+
+//		Fizzbuzz function with custom arguments
+func fizzbuzz (i1 int, i2 int, l int, s1 string, s2 string) []string {
+
+	//		Defining temporary variables
+	var count 		int = 1
+	var results 	[]string
+
+	//		Looping from 1 to limit
+	for count <= l {
+
+		//		Conditions checking potential multiples
+		//		and replacing them by appropriate strings
+		if count%i1 == 0 && count%i2 == 0 {
+			results = append(results, s1+s2)
+		} else if count%i1 == 0 {
+			results = append(results, s1)
+		} else if count%i2 == 0 {
+			results = append(results, s2)
+		} else {
+			results = append(results, strconv.Itoa(count))
+		}
+
+		//		Increment count to continue loop
+		count++
+	}
+
+	//		Returning final results
+	return results
+}
+
+
+
+
+//		Route's main function
+func Res(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 	//		Defining response's header's configuration
 	var header = w.Header()
 	header.Set("Content-Type", "application/json")
 
+	//		Getting params from the HTTP query
+	q := r.URL.Query()
+
+	//		Assigning params' values
+	int1, err = strconv.Atoi(q.Get("first_int"))
+
+	int2, err = strconv.Atoi(q.Get("second_int"))
+
+	limit, err = strconv.Atoi(q.Get("limit"))
+
+	str1 = q.Get("first_string")
+
+	str2 = q.Get("second_string")
+
 	//		Declaring response's body that will contain
 	//		the payload
 	var body = payload{
-		Results: 	[]string{},
-	}
-
-	limit = 30
-	int1 = 3
-	int2 = 5
-	str1 = "fizz"
-	str2 = "buzz"
-
-	for count <= limit {
-		if count%int1 == 0 && count%int2 == 0 {
-			body.Results = append(body.Results, str1+str2)
-		} else if count%int1 == 0 {
-			body.Results = append(body.Results, str1)
-		} else if count%int2 == 0 {
-			body.Results = append(body.Results, str2)
-		} else {
-			body.Results = append(body.Results, strconv.Itoa(count))
-		}
-
-		count++
+		Results: fizzbuzz(int1, int2, limit, str1, str2),
 	}
 
 	//		Converting body into json
@@ -71,11 +102,7 @@ func FizzBuzz(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	}
 
 	//		Creating response
-	var res = server.HTTPResponse{
-		Status: 	200,
-		Message: 	"OK",
-		Data: 		dataset,
-	}
+	var res = server.NewResponse(200, "OK", dataset)
 
 	//		Writing header and body of HTTP response
 	w.WriteHeader(res.Status)

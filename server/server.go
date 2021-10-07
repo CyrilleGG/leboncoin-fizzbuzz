@@ -20,12 +20,22 @@ type HTTPResponse struct {
 	Data 	[]byte		`json:"data"`
 }
 
-//		Function used to create server's config with DB
+//		Function to create HTTP response
+func NewResponse (s int, m string, d []byte) HTTPResponse {
+	r := HTTPResponse {
+		Status:  s,
+		Message: m,
+		Data:    d,
+	}
+	return r
+}
+
+//		Function to create server's config
 func NewServer(rt *httprouter.Router) (*Server, error){
 	if rt == nil {
 		return nil, fmt.Errorf("router is not specified")
 	}
-	s := &Server{
+	s := &Server {
 		Router:   rt,
 	}
 
