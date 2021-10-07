@@ -107,9 +107,13 @@ func Res(writer http.ResponseWriter, request *http.Request, _ httprouter.Params)
 		server.CheckError(writer, err)
 	}
 
-	str1 = q.Get("first_string")
+	if q.Get("first_string") != "" {
+		str1 = q.Get("first_string")
+	}
 
-	str2 = q.Get("second_string")
+	if q.Get("second_string") != "" {
+		str2 = q.Get("second_string")
+	}
 
 	//		Declaring response's body that will contain
 	//		the payload
