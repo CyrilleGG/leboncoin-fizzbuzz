@@ -3,6 +3,7 @@ package fizzbuzz
 import (
 	"encoding/json"
 	"log"
+	//"reflect"
 	"strconv"
 
 	"net/http"
@@ -14,13 +15,14 @@ import (
 
 
 
+
 //		Defining needed custom variables for fizzbuzz
 //		function
-var limit 		int
-var int1 		int
-var int2 		int
-var str1 		string
-var str2 		string
+var limit 		int		= 100
+var int1 		int		= 3
+var int2 		int		= 5
+var str1 		string	= "fizz"
+var str2 		string	= "buzz"
 
 //		Defining payload struct that will contain data
 //		in GO data format before converting in JSON
@@ -68,21 +70,42 @@ func fizzbuzz (i1 int, i2 int, l int, s1 string, s2 string) []string {
 
 
 //		Route's main function
-func Res(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func Res(writer http.ResponseWriter, request *http.Request, _ httprouter.Params) {
 
 	//		Defining response's header's configuration
-	var header = w.Header()
+	var header = writer.Header()
 	header.Set("Content-Type", "application/json")
 
+	//		Setting prefix and flags for logger
+	log.SetPrefix("fizzbuzz.go: ")
+	log.SetFlags(0)
+
 	//		Getting params from the HTTP query
-	q := r.URL.Query()
+	q := request.URL.Query()
 
-	//		Assigning params' values
-	int1, err = strconv.Atoi(q.Get("first_int"))
+	//		Assigning params' values to custom variables with
+	//		error handling
+	if q.Get("first_int") != "" {
+		int1, err = strconv.Atoi(q.Get("first_int"))
+		server.CheckError(writer, err)
+	}
 
-	int2, err = strconv.Atoi(q.Get("second_int"))
+	if q.Get("second_int") != "" {
+		int2, err = strconv.Atoi(q.Get("second_int"))
+		server.CheckError(writer, err)
+	}
 
-	limit, err = strconv.Atoi(q.Get("limit"))
+	//		Making sure that int1 > 0 and int2 > 0
+	if int1 == 0 || int2 == 0 {
+		log.Println("int1 and int2 cannot be 0")
+		http.Error(writer, "Please, choose a value above 0 for 'first_int' and 'second_int'", http.StatusBadRequest)
+		return
+	}
+
+	if q.Get("limit") != "" {
+		limit, err = strconv.Atoi(q.Get("limit"))
+		server.CheckError(writer, err)
+	}
 
 	str1 = q.Get("first_string")
 
@@ -90,25 +113,20 @@ func Res(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 	//		Declaring response's body that will contain
 	//		the payload
-	var body = payload{
+	var body = payload {
 		Results: fizzbuzz(int1, int2, limit, str1, str2),
 	}
 
 	//		Converting body into json
 	dataset, err := json.Marshal(body)
-	if err != nil {
-		log.Fatal("fizzbuzz.go line 68:", err)
-		return
-	}
+	server.CheckError(writer, err)
 
 	//		Creating response
-	var res = server.NewResponse(200, "OK", dataset)
+	var res = server.NewResponse(http.StatusOK, "OK", dataset)
 
 	//		Writing header and body of HTTP response
-	w.WriteHeader(res.Status)
-	_, err = w.Write(res.Data)
-	if err != nil {
-		log.Fatal("fizzbuzz.go line 81:", err)
-		return
-	}
+	header.Add("Message", res.Message)
+	writer.WriteHeader(res.Status)
+	_, err = writer.Write(res.Data)
+	server.CheckError(writer, err)
 }

@@ -13,23 +13,6 @@ type Server struct {
 	Router   *httprouter.Router
 }
 
-// 		Defining HTTPResponse struct for HTTP responses
-type HTTPResponse struct {
-	Status 	int 		`json:"statusCode"`
-	Message string 		`json:"message"`
-	Data 	[]byte		`json:"data"`
-}
-
-//		Function to create HTTP response
-func NewResponse (s int, m string, d []byte) HTTPResponse {
-	r := HTTPResponse {
-		Status:  s,
-		Message: m,
-		Data:    d,
-	}
-	return r
-}
-
 //		Function to create server's config
 func NewServer(rt *httprouter.Router) (*Server, error){
 	if rt == nil {
