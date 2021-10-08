@@ -1,9 +1,8 @@
 package routes
 
 import (
-	".."
-
-	"../../fizzbuzz"
+	"github.com/cyrillegg/leboncoin-fizzbuzz/fizzbuzz"
+	"github.com/cyrillegg/leboncoin-fizzbuzz/server"
 )
 
 //		Listing API's routes

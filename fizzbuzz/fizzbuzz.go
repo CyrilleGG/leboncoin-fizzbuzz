@@ -10,7 +10,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 
 	//"../database"
-	"../server"
+	"github.com/cyrillegg/leboncoin-fizzbuzz/server"
 )
 
 

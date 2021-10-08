@@ -7,8 +7,8 @@ import (
 	"github.com/julienschmidt/httprouter" // package for router
 
 	//"./database"
-	"./server"
-	"./server/routes"
+	"github.com/cyrillegg/leboncoin-fizzbuzz/server"
+	"github.com/cyrillegg/leboncoin-fizzbuzz/server/routes"
 )
 
 func main() {
