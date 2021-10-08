@@ -84,15 +84,22 @@ func Res(writer http.ResponseWriter, request *http.Request, _ httprouter.Params)
 	q := request.URL.Query()
 
 	//		Assigning params' values to custom variables with
-	//		error handling
+	//		error handl
+	//
+	//		TODO: better handling errors => try http req with 'first_int' = "t"
+	//
 	if q.Get("first_int") != "" {
 		int1, err = strconv.Atoi(q.Get("first_int"))
-		server.CheckError(writer, err)
+		if server.CheckError(writer, err, http.StatusBadRequest) != nil {
+			return
+		}
 	}
 
 	if q.Get("second_int") != "" {
 		int2, err = strconv.Atoi(q.Get("second_int"))
-		server.CheckError(writer, err)
+		if server.CheckError(writer, err, http.StatusBadRequest) != nil {
+			return
+		}
 	}
 
 	//		Making sure that int1 > 0 and int2 > 0
@@ -104,7 +111,9 @@ func Res(writer http.ResponseWriter, request *http.Request, _ httprouter.Params)
 
 	if q.Get("limit") != "" {
 		limit, err = strconv.Atoi(q.Get("limit"))
-		server.CheckError(writer, err)
+		if server.CheckError(writer, err, http.StatusBadRequest) != nil {
+			return
+		}
 	}
 
 	if q.Get("first_string") != "" {
@@ -123,7 +132,9 @@ func Res(writer http.ResponseWriter, request *http.Request, _ httprouter.Params)
 
 	//		Converting body into json
 	dataset, err := json.Marshal(body)
-	server.CheckError(writer, err)
+	if server.CheckError(writer, err, http.StatusInternalServerError) != nil {
+		return
+	}
 
 	//		Creating response
 	var res = server.NewResponse(http.StatusOK, "OK", dataset)
@@ -132,5 +143,7 @@ func Res(writer http.ResponseWriter, request *http.Request, _ httprouter.Params)
 	header.Add("Message", res.Message)
 	writer.WriteHeader(res.Status)
 	_, err = writer.Write(res.Data)
-	server.CheckError(writer, err)
+	if server.CheckError(writer, err, http.StatusInternalServerError) != nil {
+		return
+	}
 }
