@@ -2,6 +2,7 @@ package main
 
 import (
 	"log" // package for log
+	"os"
 
 	"net/http" // package for http operations
 	"github.com/julienschmidt/httprouter" // package for router
@@ -34,5 +35,6 @@ func main() {
 
 	//		Launching API and its routes
 	routes.Routes(server)
-	log.Fatal(http.ListenAndServe(":3000", server.Router))
+	port := os.Getenv("PORT")
+	log.Fatal(http.ListenAndServe(":" + port, server.Router))
 }
