@@ -3,7 +3,6 @@ package fizzbuzz
 import (
 	"crypto/md5"
 	"encoding/hex"
-	"log"
 	"strconv"
 
 	"github.com/cyrillegg/leboncoin-fizzbuzz/database"
@@ -42,7 +41,6 @@ func (m *Metrics) hashParams() error {
 	hParams.Write([]byte(params))
 	var hexaParams = hParams.Sum(nil)
 	var hashParamsStr = hex.EncodeToString(hexaParams)
-	log.Println(hashParamsStr)
 
 	//		Assigning result
 	m.ParamsHash = hashParamsStr

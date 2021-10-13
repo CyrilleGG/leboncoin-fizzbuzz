@@ -125,7 +125,6 @@ func Res(writer http.ResponseWriter, request *http.Request, _ httprouter.Params)
 	}
 
 	//		Inserting metrics regarding params into DB
-	log.Println(request.RemoteAddr)
 	var metrics = Metrics{
 		IpAddress:    request.RemoteAddr,
 		FirstInt:     int1,
