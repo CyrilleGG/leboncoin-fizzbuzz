@@ -28,5 +28,8 @@ func main() {
 	//		Launching API and its routes
 	routes.Routes(server)
 	port := os.Getenv("PORT")
+	if port == "" {
+		port = "3000"
+	}
 	log.Fatal(http.ListenAndServe(":" + port, server.Router))
 }
