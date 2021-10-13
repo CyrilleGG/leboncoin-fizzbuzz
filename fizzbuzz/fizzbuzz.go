@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"sync"
 
 	"github.com/julienschmidt/httprouter"
 
@@ -120,6 +121,7 @@ func Res(writer http.ResponseWriter, request *http.Request, _ httprouter.Params)
 	}
 
 	//		Inserting metrics regarding params into DB
+	//		with a goroutine
 	var tracker = ParamsTracker {
 		IpAddress:    request.RemoteAddr,
 		FirstInt:     int1,
@@ -129,7 +131,9 @@ func Res(writer http.ResponseWriter, request *http.Request, _ httprouter.Params)
 		SecondString: str2,
 		ParamsHash:   "",
 	}
-	err = tracker.Insert()
+	var wg sync.WaitGroup
+	wg.Add(1)
+	err = tracker.Insert(&wg)
 	if server.CheckError(writer, err, http.StatusInternalServerError) != nil {
 		return
 	}
@@ -148,6 +152,9 @@ func Res(writer http.ResponseWriter, request *http.Request, _ httprouter.Params)
 
 	//		Creating response
 	var res = server.NewResponse(http.StatusOK, "OK", dataset)
+
+	//		Waiting for WaitGroup to be done
+	wg.Wait()
 
 	//		Writing header and body of HTTP response
 	header.Add("Message", res.Message)

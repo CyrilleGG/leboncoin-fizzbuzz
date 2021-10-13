@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"sync"
 
 	"github.com/julienschmidt/httprouter"
 
@@ -69,7 +70,7 @@ func (m *ParamsTracker) hashParams() error {
 
 
 //		Function to record used params into DB
-func (m *ParamsTracker) Insert() error {
+func (m *ParamsTracker) Insert(waitgroup *sync.WaitGroup) error {
 	err := m.hashParams()
 	if err != nil {
 		return err
@@ -87,6 +88,9 @@ INSERT INTO fizzbuzz_queries ("id", "ip_address", "time", "first_int", "second_i
 		return err
 	}
 
+	//		Indicating that the goroutine is
+	//		done and end function
+	waitgroup.Done()
 	return nil
 }
 
