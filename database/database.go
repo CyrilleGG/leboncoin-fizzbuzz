@@ -17,7 +17,7 @@ var user, _ = os.LookupEnv("DB_USER")
 var pwd, _ = os.LookupEnv("DB_PASSWORD")
 
 // 		Declaring config connection for DB
-var connStr = "host=" + dbHost + " port=5432 dbname=" + dbName + " user=" + user + " password=" + pwd + " sslmode=disable"
+var connStr = "host=" + dbHost + " port=5432 dbname=" + dbName + " user=" + user + " password=" + pwd + " sslmode=require"
 
 // 		Opening connection to DB with postgres driver
 //		and check if error
