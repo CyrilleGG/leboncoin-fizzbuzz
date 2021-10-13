@@ -11,8 +11,8 @@ import (
 
 
 
-//		Defining Metrics struct
-type Metrics struct {
+//		Defining ParamsTracker struct
+type ParamsTracker struct {
 	IpAddress		string
 	FirstInt		int
 	SecondInt		int
@@ -26,7 +26,7 @@ type Metrics struct {
 
 
 //		Function to hash data
-func (m *Metrics) hashParams() error {
+func (m *ParamsTracker) hashParams() error {
 
 	//		Converting integers into strings
 	var int1 = strconv.Itoa(m.FirstInt)
@@ -51,8 +51,8 @@ func (m *Metrics) hashParams() error {
 
 
 
-//		Function to insert metrics into DB
-func (m *Metrics) Insert() error {
+//		Function to record used params into DB
+func (m *ParamsTracker) Insert() error {
 	err := m.hashParams()
 	if err != nil {
 		return err

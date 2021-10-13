@@ -125,7 +125,7 @@ func Res(writer http.ResponseWriter, request *http.Request, _ httprouter.Params)
 	}
 
 	//		Inserting metrics regarding params into DB
-	var metrics = Metrics{
+	var tracker = ParamsTracker {
 		IpAddress:    request.RemoteAddr,
 		FirstInt:     int1,
 		SecondInt:    int2,
@@ -134,7 +134,7 @@ func Res(writer http.ResponseWriter, request *http.Request, _ httprouter.Params)
 		SecondString: str2,
 		ParamsHash:   "",
 	}
-	err = metrics.Insert()
+	err = tracker.Insert()
 	if server.CheckError(writer, err, http.StatusInternalServerError) != nil {
 		return
 	}
