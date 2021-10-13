@@ -121,6 +121,21 @@ func Res(writer http.ResponseWriter, request *http.Request, _ httprouter.Params)
 		str2 = q.Get("second_string")
 	}
 
+	//		Inserting metrics regarding params into DB
+	var tracker = ParamsTracker {
+		IpAddress:    request.RemoteAddr,
+		FirstInt:     int1,
+		SecondInt:    int2,
+		Limit:        limit,
+		FirstString:  str1,
+		SecondString: str2,
+		ParamsHash:   "",
+	}
+	err = tracker.Insert()
+	if server.CheckError(writer, err, http.StatusInternalServerError) != nil {
+		return
+	}
+
 	//		Declaring response's body that will contain
 	//		the payload
 	var body = payload {
