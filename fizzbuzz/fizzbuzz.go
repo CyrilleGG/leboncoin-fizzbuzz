@@ -84,10 +84,7 @@ func Res(writer http.ResponseWriter, request *http.Request, _ httprouter.Params)
 	q := request.URL.Query()
 
 	//		Assigning params' values to custom variables with
-	//		error handl
-	//
-	//		TODO: better handling errors => try http req with 'first_int' = "t"
-	//
+	//		error handling
 	if q.Get("first_int") != "" {
 		int1, err = strconv.Atoi(q.Get("first_int"))
 		if server.CheckError(writer, err, http.StatusBadRequest) != nil {
