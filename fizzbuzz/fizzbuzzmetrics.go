@@ -3,9 +3,15 @@ package fizzbuzz
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"encoding/json"
+	"log"
+	"net/http"
 	"strconv"
 
+	"github.com/julienschmidt/httprouter"
+
 	"github.com/cyrillegg/leboncoin-fizzbuzz/database"
+	"github.com/cyrillegg/leboncoin-fizzbuzz/server"
 )
 
 
@@ -20,6 +26,17 @@ type ParamsTracker struct {
 	FirstString		string
 	SecondString	string
 	ParamsHash		string
+}
+
+//		Defining Metrics struct
+type Metrics struct {
+	FirstInt		int		`json:"first_int"`
+	SecondInt		int		`json:"second_int"`
+	Limit			int		`json:"limit"`
+	FirstString		string	`json:"first_string"`
+	SecondString	string	`json:"second_string"`
+	ParamsHash		string	`json:"params_hash"`
+	Count			int		`json:"hits"`
 }
 
 
@@ -69,4 +86,96 @@ INSERT INTO fizzbuzz_queries ("id", "ip_address", "time", "first_int", "second_i
 	}
 
 	return nil
+}
+
+
+
+
+//		Function to get metrics recorded on DB
+func GetMetrics(writer http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
+
+	//		Defining response's header's configuration
+	var header = writer.Header()
+	header.Set("Content-Type", "application/json")
+
+	//		Setting prefix and flags for logger
+	log.SetPrefix("fizzbuzzmetrics.go: ")
+	log.SetFlags(0)
+
+	//		Declaring response's body that will store
+	//		the metrics
+	var body = Metrics {
+		FirstInt:     0,
+		SecondInt:    0,
+		Limit:        0,
+		FirstString:  "",
+		SecondString: "",
+		ParamsHash:   "",
+		Count:        0,
+	}
+
+	//		Writing SQL query
+	query := `
+SELECT first_int, second_int, "limit", first_string, second_string, params_hash, COUNT(params_hash) AS hits 
+FROM fizzbuzz_queries  GROUP BY first_int, second_int, "limit", first_string, second_string, params_hash 
+HAVING COUNT(params_hash)=( 
+	SELECT MAX(params_cnt) 
+	FROM ( 
+		SELECT params_hash, COUNT(params_hash) AS params_cnt 
+		FROM fizzbuzz_queries 
+		GROUP BY params_hash
+	) AS foo
+);
+`
+
+	// 		Preparing query
+	stmt, err := database.Open().Prepare(query)
+	if server.CheckError(writer, err, http.StatusInternalServerError) != nil {
+		return
+	}
+	defer stmt.Close()
+
+	// 		Starting query
+	rows, err := stmt.Query()
+	if server.CheckError(writer, err, http.StatusInternalServerError) != nil {
+		return
+	}
+	defer rows.Close()
+
+	// 		Stocking data from SQL result into body
+	for rows.Next() {
+		err = rows.Scan(
+			&body.FirstInt,
+			&body.SecondInt,
+			&body.Limit,
+			&body.FirstString,
+			&body.SecondString,
+			&body.ParamsHash,
+			&body.Count,
+		)
+		if server.CheckError(writer, err, http.StatusInternalServerError) != nil {
+			return
+		}
+	}
+	err = rows.Err()
+	if server.CheckError(writer, err, http.StatusInternalServerError) != nil {
+		return
+	}
+
+	//		Converting body into json
+	dataset, err := json.Marshal(body)
+	if server.CheckError(writer, err, http.StatusInternalServerError) != nil {
+		return
+	}
+
+	//		Creating response
+	var res = server.NewResponse(http.StatusOK, "OK", dataset)
+
+	//		Writing header and body of HTTP response
+	header.Add("Message", res.Message)
+	writer.WriteHeader(res.Status)
+	_, err = writer.Write(res.Data)
+	if server.CheckError(writer, err, http.StatusInternalServerError) != nil {
+		return
+	}
 }
