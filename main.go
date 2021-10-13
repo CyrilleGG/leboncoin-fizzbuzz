@@ -1,12 +1,10 @@
 package main
 
 import (
-	"log" // package for log
+	"log"
+	"net/http"
 	"os"
 
-	//"os"
-
-	"net/http" // package for http operations
 	"github.com/julienschmidt/httprouter" // package for router
 
 	"github.com/cyrillegg/leboncoin-fizzbuzz/database"

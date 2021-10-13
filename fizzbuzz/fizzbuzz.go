@@ -3,13 +3,11 @@ package fizzbuzz
 import (
 	"encoding/json"
 	"log"
-	//"reflect"
+	"net/http"
 	"strconv"
 
-	"net/http"
 	"github.com/julienschmidt/httprouter"
 
-	//"../database"
 	"github.com/cyrillegg/leboncoin-fizzbuzz/server"
 )
 

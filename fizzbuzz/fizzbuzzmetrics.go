@@ -75,11 +75,13 @@ func (m *ParamsTracker) Insert() error {
 		return err
 	}
 
+	//		Writing SQL query with custom params
 	var query = `
 INSERT INTO fizzbuzz_queries ("id", "ip_address", "time", "first_int", "second_int", "limit", "first_string", "second_string", "params_hash")
 	VALUES (DEFAULT, $1, DEFAULT, $2, $3, $4, $5, $6, $7)
 `
 
+	//		Executing SQL query with params
 	_, err = database.Open().Exec(query, m.IpAddress, m.FirstInt, m.SecondInt, m.Limit, m.FirstString, m.SecondString, m.ParamsHash)
 	if err != nil {
 		return err

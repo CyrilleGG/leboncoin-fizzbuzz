@@ -24,7 +24,6 @@ func NewResponse (status int, message string, data []byte) HTTPResponse {
 
 //		Function that checks for any error from code and
 //		sends a HTTP 500 response if so
-
 func CheckError (writer http.ResponseWriter, e error, status int) interface{}{
 	if e != nil {
 		log.Println(e)

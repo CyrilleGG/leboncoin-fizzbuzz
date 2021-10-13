@@ -1,10 +1,11 @@
 package fizzbuzz
 
 import (
-	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/julienschmidt/httprouter"
 )
 
 

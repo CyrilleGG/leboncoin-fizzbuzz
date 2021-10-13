@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/julienschmidt/httprouter"
+	"github.com/julienschmidt/httprouter" // package for router
 )
 
 //		Defining server struct and its dependencies
