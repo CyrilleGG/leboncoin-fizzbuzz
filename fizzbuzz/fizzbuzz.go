@@ -82,21 +82,31 @@ func Res(writer http.ResponseWriter, request *http.Request, _ httprouter.Params)
 	//		Getting params from the HTTP query
 	q := request.URL.Query()
 
-	//		Assigning params' values to custom variables with
-	//		error handling
-	if q.Get("first_int") != "" {
-		int1, err = strconv.Atoi(q.Get("first_int"))
-		if server.CheckError(writer, err, http.StatusBadRequest) != nil {
-			return
-		}
-	}
+	//		Creating a WaitGroup for goroutines
+	var wg sync.WaitGroup
 
-	if q.Get("second_int") != "" {
-		int2, err = strconv.Atoi(q.Get("second_int"))
-		if server.CheckError(writer, err, http.StatusBadRequest) != nil {
-			return
+	//		Assigning params' values to custom variables with
+	//		goroutines and error handling
+	wg.Add(2)
+	go func() {
+		if q.Get("first_int") != "" {
+			int1, err = strconv.Atoi(q.Get("first_int"))
+			if server.CheckError(writer, err, http.StatusBadRequest) != nil {
+				return
+			}
 		}
-	}
+		wg.Done()
+	}()
+
+	go func() {
+		if q.Get("second_int") != "" {
+			int2, err = strconv.Atoi(q.Get("second_int"))
+			if server.CheckError(writer, err, http.StatusBadRequest) != nil {
+				return
+			}
+		}
+		wg.Done()
+	}()
 
 	//		Making sure that int1 > 0 and int2 > 0
 	if int1 == 0 || int2 == 0 {
@@ -105,20 +115,33 @@ func Res(writer http.ResponseWriter, request *http.Request, _ httprouter.Params)
 		return
 	}
 
-	if q.Get("limit") != "" {
-		limit, err = strconv.Atoi(q.Get("limit"))
-		if server.CheckError(writer, err, http.StatusBadRequest) != nil {
-			return
+	wg.Add(3)
+	go func() {
+		if q.Get("limit") != "" {
+			limit, err = strconv.Atoi(q.Get("limit"))
+			if server.CheckError(writer, err, http.StatusBadRequest) != nil {
+				return
+			}
 		}
-	}
+		wg.Done()
+	}()
 
-	if q.Get("first_string") != "" {
-		str1 = q.Get("first_string")
-	}
+	go func() {
+		if q.Get("first_string") != "" {
+			str1 = q.Get("first_string")
+		}
+		wg.Done()
+	}()
 
-	if q.Get("second_string") != "" {
-		str2 = q.Get("second_string")
-	}
+	go func() {
+		if q.Get("second_string") != "" {
+			str2 = q.Get("second_string")
+		}
+		wg.Done()
+	}()
+
+	//		Waiting for WaitGroup to be done
+	wg.Wait()
 
 	//		Inserting metrics regarding params into DB
 	//		with a goroutine
@@ -131,7 +154,6 @@ func Res(writer http.ResponseWriter, request *http.Request, _ httprouter.Params)
 		SecondString: str2,
 		ParamsHash:   "",
 	}
-	var wg sync.WaitGroup
 	wg.Add(1)
 	err = tracker.Insert(&wg)
 	if server.CheckError(writer, err, http.StatusInternalServerError) != nil {
